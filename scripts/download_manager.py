@@ -119,6 +119,7 @@ class Manager():
 
 
     def addtags(self, filename, json_data, playlist_name, track_number, total_tracks):
+        print(json_data)
         audio = MP4(filename)
         audio['\xa9nam'] = html.unescape(self.unicode(json_data['song']))
 
@@ -142,8 +143,13 @@ class Manager():
         audio['\xa9ART'] = metadata['artist']
         audio['aART'] = metadata['album_artist']
 
+        # Handle duplicate music entries
+        music = json_data['music'].split(', ')
+        music = list(set(music))  # remove duplicates
+        music = ', '.join(music)  # join back together
+
         audio['\xa9alb'] = html.unescape(self.unicode(json_data['album']))
-        audio['\xa9wrt'] = html.unescape(self.unicode(json_data['music']))
+        audio['\xa9wrt'] = html.unescape(self.unicode(music))  # use the cleaned music data
         audio['desc'] = html.unescape(self.unicode(json_data['starring']))
         audio['\xa9gen'] = html.unescape(self.unicode(playlist_name))
         audio['\xa9day'] = html.unescape(self.unicode(json_data['year']))
@@ -156,6 +162,7 @@ class Manager():
 
         audio['covr'] = [cover]
         audio.save()
+
 
 
 
