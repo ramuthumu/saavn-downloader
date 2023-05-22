@@ -55,8 +55,8 @@ class Manager():
         return location
 
     def start_download(self, filename, location, dec_url, retry_count=3):
-        if os.path.isfile(location):
-            print("Downloaded {0}".format(filename))
+        if os.path.isfile(location) and os.path.getsize(location) > 0:
+            print("Already downloaded {0}".format(filename))
             return False
         else:
             while retry_count > 0:
