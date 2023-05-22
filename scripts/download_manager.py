@@ -47,7 +47,7 @@ class Manager():
 
     def get_download_location(self, *args):
         if self.args.outFolder is None:
-            location = os.getcwd()
+            location = "/Users/ramuthumu/Music/Music/"
         else:
             location = self.args.outFolder
         for folder in args:
@@ -128,7 +128,7 @@ class Manager():
         else:
             main_artist = html.unescape(self.unicode(json_data['singers']))
             if 'featured_artists' in json_data and json_data['featured_artists']:
-                main_artist += ',' + html.unescape(self.unicode(json_data['featured_artists']))
+                main_artist += ', ' + html.unescape(self.unicode(json_data['featured_artists']))
             audio['\xa9ART'] = main_artist  # artist is now 'singers,music'
             audio['aART'] = html.unescape(self.unicode(json_data['primary_artists'].split(', ')[0]))  # album artist is 'singers'
 
