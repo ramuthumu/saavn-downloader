@@ -111,7 +111,7 @@ class Manager():
             if 'featured_artists' in json_data and json_data['featured_artists']:
                 main_artist += ',' + html.unescape(self.unicode(json_data['featured_artists']))
             audio['\xa9ART'] = main_artist  # artist is now 'singers,music'
-            audio['aART'] = html.unescape(self.unicode(json_data['primary_artists'].split(',')[0]))  # album artist is 'singers'
+            audio['aART'] = html.unescape(self.unicode(json_data['primary_artists'].split(', ')[0]))  # album artist is 'singers'
 
         audio['\xa9alb'] = html.unescape(self.unicode(json_data['album']))
         audio['\xa9wrt'] = html.unescape(self.unicode(json_data['music']))
