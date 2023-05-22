@@ -141,3 +141,12 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+Non-Artist/
+
+
+Saavn-Downloader.iml
+
+.gitignore
+.idea/
+
+

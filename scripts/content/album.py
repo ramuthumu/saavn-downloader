@@ -1,6 +1,7 @@
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 import json
+import html
 
 from ..download_manager import Manager
 
@@ -35,7 +36,8 @@ class Album():
     
     def setAlbumID(self, albumID):
         self.albumID = albumID
-    
+
+
     def getAlbum(self, albumID=None):
         if albumID is None:
             albumID = self.albumID
@@ -45,11 +47,13 @@ class Album():
         if response.status_code == 200:
             self.songs_json = [x for x in response.text.splitlines() if x.strip().startswith('{')][0]
             self.songs_json = json.loads(self.songs_json)
-            print("Album name: ",self.songs_json["name"])
-            self.album_name=self.songs_json["name"]
-            self.album_name = self.album_name.replace("&quot;", "'")
+            album_name = self.songs_json["name"]
+            album_name = html.unescape(album_name)  # Decode HTML entities
+            print("Album name:", album_name)
+            self.album_name = album_name
         return self.songs_json, self.album_name
-    
+
+
     def downloadAlbum(self, artist_name=''):
         if self.albumID is not None:
             print("Initiating Album Download")
