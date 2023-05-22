@@ -98,7 +98,6 @@ class Manager():
 
 
     def addtags(self, filename, json_data, playlist_name, track_number, total_tracks):
-        print(json_data)
         audio = MP4(filename)
         audio['\xa9nam'] = html.unescape(self.unicode(json_data['song']))
 
