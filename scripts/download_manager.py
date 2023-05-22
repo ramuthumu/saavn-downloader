@@ -121,17 +121,16 @@ class Manager():
     def addtags(self, filename, json_data, playlist_name, track_number, total_tracks):
         print(json_data)
         audio = MP4(filename)
-        audio['\xa9nam'] = html.unescape(self.unicode(json_data['song']))
+        audio['\xa9nam'] = html.unescape(self.unicode(self.remove_duplicates(json_data['song'])))
 
-        # Handle duplicate music entries
-        music = json_data['music'].split(', ')
-        music = list(set(music))  # remove duplicates
-        music = ', '.join(music)  # join back together
+        # Handle duplicate entries in the json_data
+        for key in json_data:
+            json_data[key] = self.remove_duplicates(json_data[key])
 
         metadata_mapping = {
             'telugu': {
                 'artist': html.unescape(self.unicode(json_data['singers'])),
-                'album_artist': html.unescape(self.unicode(music))
+                'album_artist': html.unescape(self.unicode(json_data['music']))
             },
             'default': {
                 'artist': html.unescape(self.unicode(json_data['singers'])),
@@ -145,13 +144,10 @@ class Manager():
         language = json_data['language'].lower()
         metadata = metadata_mapping.get(language, metadata_mapping['default'])
 
-        audio['\xa9ART'] = metadata['artist']
-        audio['aART'] = metadata['album_artist']
-
-
-
+        audio['\xa9ART'] = self.remove_duplicates(metadata['artist'])
+        audio['aART'] = self.remove_duplicates(metadata['album_artist'])
         audio['\xa9alb'] = html.unescape(self.unicode(json_data['album']))
-        audio['\xa9wrt'] = html.unescape(self.unicode(music))  # use the cleaned music data
+        audio['\xa9wrt'] = html.unescape(self.unicode(json_data['music']))
         audio['desc'] = html.unescape(self.unicode(json_data['starring']))
         audio['\xa9gen'] = html.unescape(self.unicode(playlist_name))
         audio['\xa9day'] = html.unescape(self.unicode(json_data['year']))
@@ -164,6 +160,15 @@ class Manager():
 
         audio['covr'] = [cover]
         audio.save()
+
+    def remove_duplicates(self, input_str):
+        if not isinstance(input_str, str):
+            return input_str
+
+        elements = input_str.split(', ')
+        elements = list(set(elements))  # remove duplicates
+        return ', '.join(elements)  # join back together
+
 
 
 
