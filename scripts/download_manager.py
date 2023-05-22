@@ -54,15 +54,27 @@ class Manager():
             location = os.path.join(location, folder)
         return location
 
-    def start_download(self, filename, location, dec_url):
+    def start_download(self, filename, location, dec_url, retry_count=3):
         if os.path.isfile(location):
             print("Downloaded {0}".format(filename))
             return False
-        else :
-            print("Downloading {0}".format(filename))
-            obj = SmartDL(dec_url, location, timeout=REQUEST_TIMEOUT)
-            obj.start()
-            return True
+        else:
+            while retry_count > 0:
+                try:
+                    print("Downloading {0}".format(filename))
+                    obj = SmartDL(dec_url, location, timeout=REQUEST_TIMEOUT)
+                    obj.start()
+                    # after download, check file size. If file size is 0 or too small, retry download
+                    if os.path.getsize(location) > 0:
+                        return True
+                    else:
+                        print(f"File {filename} downloaded but file size is zero. Retrying...")
+                        retry_count -= 1
+                except Exception as e:
+                    print(f'Error downloading file {filename}: {e}. Retries left: {retry_count}')
+                    retry_count -= 1
+            return False
+
 
     def downloadSongs(self, songs_json, album_name='songs', artist_name='Non-Artist'):
         with ThreadPoolExecutor(max_workers=5) as executor:  # you can adjust max_workers based on your system's capacity
@@ -77,7 +89,7 @@ class Manager():
                     future = executor.submit(self.start_download, filename, location, dec_url)
                     futures.append((future, song, location, track_number, total_tracks))  # store future along with related information
                 except Exception as e:
-                    print('Download Error: {0}'.format(e))
+                    print('Error scheduling download for {0}: {1}'.format(song, e))
 
             for future, song, location, track_number, total_tracks in futures:
                 try:
@@ -94,7 +106,7 @@ class Manager():
                             print("Error : {0}".format(e))
                         print('\n')
                 except Exception as e:
-                    print('Download Error : {0}'.format(e))
+                    print('Error during download process for {0}: {1}'.format(song, e))
 
 
     def addtags(self, filename, json_data, playlist_name, track_number, total_tracks):
