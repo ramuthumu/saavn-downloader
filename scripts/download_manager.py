@@ -83,38 +83,40 @@ class Manager():
             return False
 
 
-
     def downloadSongs(self, songs_json, album_name='songs', artist_name='Non-Artist'):
-        with ThreadPoolExecutor(max_workers=10) as executor:  # you can adjust max_workers based on your system's capacity
+        print(f"Downloading {len(songs_json['songs'])} songs...")
+
+        songs = [song for song in songs_json['songs'] if song['language'] in ['english', 'telugu']]
+
+        with ThreadPoolExecutor(max_workers=10) as executor:
             futures = []
-            total_tracks = len(songs_json['songs'])
-            for i, song in enumerate(songs_json['songs']):
+            total_tracks = len(songs)
+
+            for i, song in enumerate(songs):
                 try:
                     dec_url = self.get_dec_url(song['encrypted_media_url'])
                     filename = self.format_filename(song['song'])
                     location = self.get_download_location(artist_name, album_name, filename)
-                    track_number = i + 1  # Assuming tracks are listed in order
+                    track_number = i + 1
                     future = executor.submit(self.start_download, filename, location, dec_url)
-                    futures.append((future, song, location, track_number, total_tracks))  # store future along with related information
+                    futures.append((future, song, location, track_number, total_tracks))
                 except Exception as e:
-                    print('Error scheduling download for {0}: {1}'.format(song, e))
+                    print(f'Error scheduling download for {song["song"]}: {e}')
 
             for future, song, location, track_number, total_tracks in futures:
                 try:
-                    has_downloaded = future.result()  # get result from future
+                    has_downloaded = future.result()
                     if has_downloaded:
-                        try:
-                            name = songs_json['name'] if 'name' in songs_json else songs_json['listname']
-                        except:
-                            name = ''
+                        name = songs_json.get('name', songs_json.get('listname', ''))
                         try:
                             self.addtags(location, song, name, track_number, total_tracks)
                         except Exception as e:
                             print("============== Error Adding Meta Data ==============")
-                            print("Error : {0}".format(e))
+                            print(f"Error : {e}")
                         print('\n')
                 except Exception as e:
-                    print('Error during download process for {0}: {1}'.format(song, e))
+                    print(f'Error during download process for {song["song"]}: {e}')
+
 
     def addtags(self, filename, json_data, playlist_name, track_number, total_tracks):
         audio = MP4(filename)
