@@ -56,7 +56,7 @@ class Manager():
 
 
 
-    def start_download(self, filename, location, dec_url, retry_count=3, backoff_time=1):
+    def start_download(self, filename, location, dec_url, retry_count=10, backoff_time=1):
         if os.path.isfile(location) and os.path.getsize(location) > 0:
             print("Already downloaded {0}".format(filename))
             return True
@@ -85,7 +85,7 @@ class Manager():
 
 
     def downloadSongs(self, songs_json, album_name='songs', artist_name='Non-Artist'):
-        with ThreadPoolExecutor(max_workers=5) as executor:  # you can adjust max_workers based on your system's capacity
+        with ThreadPoolExecutor(max_workers=10) as executor:  # you can adjust max_workers based on your system's capacity
             futures = []
             total_tracks = len(songs_json['songs'])
             for i, song in enumerate(songs_json['songs']):
