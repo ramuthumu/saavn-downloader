@@ -116,21 +116,29 @@ class Manager():
                 except Exception as e:
                     print('Error during download process for {0}: {1}'.format(song, e))
 
-
     def addtags(self, filename, json_data, playlist_name, track_number, total_tracks):
         audio = MP4(filename)
         audio['\xa9nam'] = html.unescape(self.unicode(json_data['song']))
 
-        # Check the language of the song
-        if json_data['language'].lower() == 'telugu':
-            audio['\xa9ART'] = html.unescape(self.unicode(json_data['singers']))  # artist is now 'singers
-            audio['aART'] = html.unescape(self.unicode(json_data['music']))  # album artist is now 'music'
-        else:
-            main_artist = html.unescape(self.unicode(json_data['singers']))
-            if 'featured_artists' in json_data and json_data['featured_artists']:
-                main_artist += ', ' + html.unescape(self.unicode(json_data['featured_artists']))
-            audio['\xa9ART'] = main_artist  # artist is now 'singers,music'
-            audio['aART'] = html.unescape(self.unicode(json_data['primary_artists'].split(', ')[0]))  # album artist is 'singers'
+        metadata_mapping = {
+            'telugu': {
+                'artist': html.unescape(self.unicode(json_data['singers'])),
+                'album_artist': html.unescape(self.unicode(json_data['music']))
+            },
+            'default': {
+                'artist': html.unescape(self.unicode(json_data['singers'])),
+                'album_artist': html.unescape(self.unicode(json_data['primary_artists'].split(', ')[0]))
+            }
+        }
+
+        if 'featured_artists' in json_data and json_data['featured_artists']:
+            metadata_mapping['default']['artist'] += ', ' + html.unescape(self.unicode(json_data['featured_artists']))
+
+        language = json_data['language'].lower()
+        metadata = metadata_mapping.get(language, metadata_mapping['default'])
+
+        audio['\xa9ART'] = metadata['artist']
+        audio['aART'] = metadata['album_artist']
 
         audio['\xa9alb'] = html.unescape(self.unicode(json_data['album']))
         audio['\xa9wrt'] = html.unescape(self.unicode(json_data['music']))
@@ -141,10 +149,11 @@ class Manager():
         audio['trkn'] = [(track_number, total_tracks)]
 
         cover_url = json_data['image'][:-11] + '500x500.jpg'
-        fd = urllib.request.urlopen(cover_url)
-        cover = MP4Cover(fd.read(), getattr(MP4Cover, 'FORMAT_PNG' if cover_url.endswith('png') else 'FORMAT_JPEG'))
-        fd.close()
+        with urllib.request.urlopen(cover_url) as fd:
+            cover = MP4Cover(fd.read(), getattr(MP4Cover, 'FORMAT_PNG' if cover_url.endswith('png') else 'FORMAT_JPEG'))
+
         audio['covr'] = [cover]
         audio.save()
+
 
 
