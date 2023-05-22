@@ -47,7 +47,7 @@ class Manager():
 
     def get_download_location(self, *args):
         if self.args.outFolder is None:
-            location = "/Users/ramuthumu/Music/Music/"
+            location = os.getcwd()
         else:
             location = self.args.outFolder
         for folder in args:
