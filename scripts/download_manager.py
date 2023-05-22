@@ -1,7 +1,7 @@
 from mutagen.mp4 import MP4, MP4Cover
 import urllib.request
 import html
-import json
+import time
 import base64
 import os
 
@@ -54,10 +54,12 @@ class Manager():
             location = os.path.join(location, folder)
         return location
 
-    def start_download(self, filename, location, dec_url, retry_count=3):
+
+
+    def start_download(self, filename, location, dec_url, retry_count=3, backoff_time=1):
         if os.path.isfile(location) and os.path.getsize(location) > 0:
             print("Already downloaded {0}".format(filename))
-            return False
+            return True
         else:
             while retry_count > 0:
                 try:
@@ -68,12 +70,18 @@ class Manager():
                     if os.path.getsize(location) > 0:
                         return True
                     else:
-                        print(f"File {filename} downloaded but file size is zero. Retrying...")
+                        print(f"File {filename} downloaded but file size is zero. Retrying in {backoff_time} seconds...")
+                        time.sleep(backoff_time)
                         retry_count -= 1
+                        backoff_time *= 2  # double the backoff time
                 except Exception as e:
-                    print(f'Error downloading file {filename}: {e}. Retries left: {retry_count}')
+                    print(f'Error downloading file {filename}: {e}. Retrying in {backoff_time} seconds...')
+                    time.sleep(backoff_time)
                     retry_count -= 1
+                    backoff_time *= 2  # double the backoff time
+            print(f"Failed to download {filename} after multiple attempts.")
             return False
+
 
 
     def downloadSongs(self, songs_json, album_name='songs', artist_name='Non-Artist'):
