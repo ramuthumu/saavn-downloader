@@ -123,10 +123,15 @@ class Manager():
         audio = MP4(filename)
         audio['\xa9nam'] = html.unescape(self.unicode(json_data['song']))
 
+        # Handle duplicate music entries
+        music = json_data['music'].split(', ')
+        music = list(set(music))  # remove duplicates
+        music = ', '.join(music)  # join back together
+
         metadata_mapping = {
             'telugu': {
                 'artist': html.unescape(self.unicode(json_data['singers'])),
-                'album_artist': html.unescape(self.unicode(json_data['music']))
+                'album_artist': html.unescape(self.unicode(music))
             },
             'default': {
                 'artist': html.unescape(self.unicode(json_data['singers'])),
@@ -143,10 +148,7 @@ class Manager():
         audio['\xa9ART'] = metadata['artist']
         audio['aART'] = metadata['album_artist']
 
-        # Handle duplicate music entries
-        music = json_data['music'].split(', ')
-        music = list(set(music))  # remove duplicates
-        music = ', '.join(music)  # join back together
+
 
         audio['\xa9alb'] = html.unescape(self.unicode(json_data['album']))
         audio['\xa9wrt'] = html.unescape(self.unicode(music))  # use the cleaned music data
