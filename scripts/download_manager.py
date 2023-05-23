@@ -1,3 +1,5 @@
+import threading
+
 from mutagen.mp4 import MP4, MP4Cover
 import urllib.request
 import html
@@ -20,6 +22,7 @@ class Manager():
         self.unicode = str
         self.args = argManager()
         self.des_cipher = self.setDecipher()
+        self.lock = threading.Lock()
     
     def setDecipher(self):
         return des(b"38346591", ECB, b"\0\0\0\0\0\0\0\0", pad=None, padmode=PAD_PKCS5)
@@ -46,12 +49,13 @@ class Manager():
 
 
     def get_download_location(self, *args):
-        if self.args.outFolder is None:
-            location = os.getcwd()
-        else:
-            location = self.args.outFolder
-        for folder in args:
-            location = os.path.join(location, folder)
+        with self.lock:  # Acquire the lock before checking and creating directory
+            if self.args.outFolder is None:
+                location = "/Volumes/T7 Shield/music"
+            else:
+                location = self.args.outFolder
+            for folder in args:
+                location = os.path.join(location, folder)
         return location
 
 
