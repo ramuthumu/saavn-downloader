@@ -3,7 +3,8 @@ import json
 
 
 from ..helper import setProxy, argManager
-from ..download_manager import Manager
+from ..download_manager import Manager, format_filename
+
 
 class Song():
     def __init__(self, proxies, headers, url=None):
@@ -73,12 +74,12 @@ class Song():
         song = self.song_json[self.songID]
         try:
             dec_url = manager.get_dec_url(song["more_info"]['encrypted_media_url'])
-            filename = manager.format_filename(song['title'])
+            filename = format_filename(song['title'])
         except Exception as e:
             print('Download Error : {0}'.format(e))
         try:
             location = manager.get_download_location(artist_name, album_name, filename)
-            has_downloaded = manager.start_download(filename, location, dec_url)
+            has_downloaded = manager.download_songs(filename, location, dec_url)
             if has_downloaded:
                 name = song.get('subtitle', '')
                 try:

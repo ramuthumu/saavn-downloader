@@ -42,12 +42,12 @@ class Podcast:
                 try:
                     dec_url = manager.get_dec_url(episode['more_info']['encrypted_media_url'])
                     # dec_url = dec_url.replace('_96.mp4', '_320.mp4')   # Change in url gives invalid xml
-                    filename = manager.format_filename(episode['title'])
+                    filename = format_filename(episode['title'])
                 except Exception as e:
                     print('Download Error: {0}'.format(e))
                 try:
                     location = manager.get_download_location(show_name, season_name, filename)
-                    has_downloaded = manager.start_download("Show: {} - Season: {} - Episode: {}".format(
+                    has_downloaded = start_download("Show: {} - Season: {} - Episode: {}".format(
                         show_name, season_name, filename),
                         location, dec_url)
                     if has_downloaded:

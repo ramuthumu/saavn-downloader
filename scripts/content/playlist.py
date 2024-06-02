@@ -46,7 +46,7 @@ class Playlist():
         if self.playlistID is not None:
             print("Initiating Playlist Downloading")
             manager = Manager()
-            manager.downloadSongs(self.getPlaylist())
+            manager.download_songs(self.getPlaylist())
     
     def start_download(self):
         self.getPlaylistID()

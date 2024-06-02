@@ -6,7 +6,8 @@ from .content.album import Album
 from .content.podcast import Podcast
 from .download_manager import Manager
 
-class Account():
+
+class Account:
     def __init__(self, proxies, headers, email, password):
         self.headers = {
             'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 9.1; Samsung S10 Build/LMY47O)',
@@ -22,33 +23,33 @@ class Account():
         self.url = 'https://www.saavn.com/api.php'
         self.session = None
         self.library_json = None
-    
+
     def getAccountSession(self, email=None, password=None, action=None):
         if email is None:
             email = self.email
         if password is None:
             password = self.password
-        
+
         payload = {
-                'password': password,
-                '_marker': '0',
-                'cc': '',
-                'ctx': 'android',
-                'network_operator': '',
-                'email': email,
-                'state': 'logout',
-                'v': '224',
-                'app_version': '6.8.2',
-                'build': 'Pro',
-                'api_version': '4',
-                'network_type': 'WIFI',
-                'username': email,
-                '_format': 'json',
-                '__call': action,
-                'manufacturer': 'Samsung',
-                'readable_version': '6.8.2',
-                'network_subtype': '',
-                'model': 'Samsung Galaxy S10'
+            'password': password,
+            '_marker': '0',
+            'cc': '',
+            'ctx': 'android',
+            'network_operator': '',
+            'email': email,
+            'state': 'logout',
+            'v': '224',
+            'app_version': '6.8.2',
+            'build': 'Pro',
+            'api_version': '4',
+            'network_type': 'WIFI',
+            'username': email,
+            '_format': 'json',
+            '__call': action,
+            'manufacturer': 'Samsung',
+            'readable_version': '6.8.2',
+            'network_subtype': '',
+            'model': 'Samsung Galaxy S10'
         }
 
         self.session = requests.Session()
@@ -78,7 +79,9 @@ class Account():
             return False
         elif data.get('data').get('uid'):
             try:
-                response = session.get("https://www.saavn.com/api.php?_marker=0&cc=&ctx=android&state=login&v=224&app_version=6.8.2&api_version=4&_format=json&__call=library.getAll")
+                response = session.get(
+                    "https://www.saavn.com/api.php?_marker=0&cc=&ctx=android&state=login&v=224&app_version=6.8.2"
+                    "&api_version=4&_format=json&__call=library.getAll")
                 library_json = [x for x in response.text.splitlines() if x.strip().startswith('{')][0]
                 library_json = json.loads(library_json)
                 # print(library_json)
@@ -91,7 +94,7 @@ class Account():
             return False
 
     def getLibrarySession(self, email=None, password=None):
-        # Function to Emualate android signin and activate library and return library_json and session instance
+        # Function to Emulate android signin and activate library and return library_json and session instance
 
         session, response = self.getAccountSession(email, password, action='user.login')
         data = [x for x in response.text.splitlines() if x.strip().startswith('{')][0]
@@ -101,11 +104,13 @@ class Account():
             return False
         elif data.get('data').get('uid'):
             try:
-                response = session.get("https://www.saavn.com/api.php?_marker=0&cc=&ctx=android&state=login&v=224&app_version=6.8.2&api_version=4&_format=json&__call=library.getAll", headers=self.headers)
+                response = session.get(
+                    "https://www.saavn.com/api.php?_marker=0&cc=&ctx=android&state=login&v=224&app_version=6.8.2&api_version=4&_format=json&__call=library.getAll",
+                    headers=self.headers)
                 self.library_json = [x for x in response.text.splitlines() if x.strip().startswith('{')][0]
                 self.library_json = json.loads(self.library_json)
                 # print(self.library_json)
-                return (self.library_json, session)
+                return self.library_json, session
             except Exception as e:
                 print(str(e))
                 return False
@@ -114,22 +119,22 @@ class Account():
 
     def logout(self, session):
         payload = {
-                '_marker': '0',
-                'cc': '',
-                'ctx': 'android',
-                'network_operator': '',
-                'state': 'logout',
-                'v': '224',
-                'app_version': '6.8.2',
-                'build': 'Pro',
-                'api_version': '4',
-                'network_type': 'WIFI',
-                '_format': 'json',
-                '__call': 'user.logout',
-                'manufacturer': 'Samsung',
-                'readable_version': '6.8.2',
-                'network_subtype': '',
-                'model': 'Samsung Galaxy S10'
+            '_marker': '0',
+            'cc': '',
+            'ctx': 'android',
+            'network_operator': '',
+            'state': 'logout',
+            'v': '224',
+            'app_version': '6.8.2',
+            'build': 'Pro',
+            'api_version': '4',
+            'network_type': 'WIFI',
+            '_format': 'json',
+            '__call': 'user.logout',
+            'manufacturer': 'Samsung',
+            'readable_version': '6.8.2',
+            'network_subtype': '',
+            'model': 'Samsung Galaxy S10'
         }
         response = session.post(self.url, headers=self.headers, data=payload)
         print(response.text)
@@ -159,29 +164,34 @@ class Account():
             for playlist in np:
                 songs_json = []
                 response = requests.get(
-                    'https://www.jiosaavn.com/api.php?listid={0}&_format=json&__call=playlist.getDetails'.format(playlist['id']))
+                    'https://www.jiosaavn.com/api.php?listid={0}&_format=json&__call=playlist.getDetails'.format(
+                        playlist['id']))
                 if response.status_code == 200:
                     songs_json = [x for x in response.text.splitlines() if x.strip().startswith('{')][0]
                     songs_json = json.loads(songs_json)
                 np_data[songs_json['listname']] = playlist['id']
 
             url = "https://www.jiosaavn.com/api.php?__call=user.login&_marker=0"
-            payload = { "username": nEmail, "password": nPassword }
+            payload = {"username": nEmail, "password": nPassword}
             session = requests.Session()
-            session.post(url, data=payload)   #Getting browser session for easy song and album addition
+            session.post(url, data=payload)  #Getting browser session for easy song and album addition
 
             print('Adding songs to new account')
             songs = olibrary_json.get('song')
             if songs is None:
                 songs = []
             for song in songs:
-                session.get('https://www.saavn.com/api.php?_marker=0&entity_type=song&entity_ids={0}&_format=json&__call=library.add'.format(song))
+                session.get(
+                    'https://www.saavn.com/api.php?_marker=0&entity_type=song&entity_ids={0}&_format=json&__call=library.add'.format(
+                        song))
             print('Adding adding albums to new account')
             albums = olibrary_json.get('album')
             if albums is None:
                 albums = []
             for album in albums:
-                session.get('https://www.saavn.com/api.php?_marker=0&entity_type=album&entity_ids={0}&_format=json&__call=library.add'.format(album))
+                session.get(
+                    'https://www.saavn.com/api.php?_marker=0&entity_type=album&entity_ids={0}&_format=json&__call=library.add'.format(
+                        album))
             print('Adding playlists to new account')
             playlists = olibrary_json.get('playlist')
             if playlists is None:
@@ -189,7 +199,8 @@ class Account():
             for playlist in playlists:
                 songs_json = []
                 response = requests.get(
-                    'https://www.jiosaavn.com/api.php?listid={0}&_format=json&__call=playlist.getDetails'.format(playlist['id']))
+                    'https://www.jiosaavn.com/api.php?listid={0}&_format=json&__call=playlist.getDetails'.format(
+                        playlist['id']))
                 if response.status_code == 200:
                     songs_json = [x for x in response.text.splitlines() if x.strip().startswith('{')][0]
                     songs_json = json.loads(songs_json)
@@ -259,35 +270,35 @@ class Account():
             self.activateLibrary(email, password)
             print('\nSUCCESS')
             print('Your Account email is: ', email)
-            print('Your Account password is: ',password)
+            print('Your Account password is: ', password)
         else:
             print('Failed to create user')
-    
+
     def start_download_playlist(self):
         playlist = Playlist(self.proxies, self.headers)
         library_json, session = self.getLibrarySession()
-        playlistIDs = library_json.get('playlist')
-        if playlistIDs is not None:
-            print("Playlists found: {}".format(len(playlistIDs)))
-            for pl in playlistIDs:
-                playlistID = pl['id']
+        playlist_ids = library_json.get('playlist')
+        if playlist_ids is not None:
+            print("Playlists found: {}".format(len(playlist_ids)))
+            for pl in playlist_ids:
+                playlist_id = pl['id']
                 manager = Manager()
-                songs_json = playlist.getPlaylist(playlistID)
-                manager.downloadSongs(songs_json)
-    
+                songs_json = playlist.getPlaylist(playlist_id)
+                manager.download_songs(songs_json)
+
     def start_download_album(self):
         library_json, session = self.getLibrarySession()
-        albumIDs = library_json.get('album')
-        if albumIDs is not None:
-            print("Albums found: {}".format(len(albumIDs)))
-            for albumID in albumIDs:
+        album_ids = library_json.get('album')
+        if album_ids is not None:
+            print("Albums found: {}".format(len(album_ids)))
+            for albumID in album_ids:
                 try:
                     album = Album(self.proxies, self.headers)
                     album.setAlbumID(albumID)
-                    album.downloadAlbum()
-                except:
-                    print('Error getting album with ID: {}'.format(albumID))
-    
+                    album.download_album()
+                except Exception as e:
+                    print('Error getting album with ID: {} with error {}'.format(albumID, e))
+
     def start_download_podcast(self):
         library_json, session = self.getLibrarySession()
         podcast = Podcast(self.proxies, self.headers)

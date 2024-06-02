@@ -114,7 +114,7 @@ class Artist():
         try:
             album = Album(self.session.proxies, self.session.headers)
             album.setAlbumID(albumId)
-            album.downloadAlbum(self.artist_name)
+            album.download_album(self.artist_name)
         except Exception as e:
             print('Error getting album with ID: {}'.format(albumId))
             raise e
@@ -137,7 +137,7 @@ class Artist():
                 self.artist_json = json.loads(self.artist_json)
                 songs_json = self.artist_json['topSongs']   # A dict with key songs having at most 10 songs
                 manager = Manager()
-                manager.downloadSongs(songs_json, artist_name=artist_name)
+                manager.download_songs(songs_json, artist_name=artist_name)
         except Exception as e:
             print(str(e))
             print('No songs found for the artist')
