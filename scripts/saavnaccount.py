@@ -294,7 +294,7 @@ class Account:
             for albumID in album_ids:
                 try:
                     album = Album(self.proxies, self.headers)
-                    album.setAlbumID(albumID)
+                    album.set_album_id(albumID)
                     album.download_album()
                 except Exception as e:
                     print('Error getting album with ID: {} with error {}'.format(albumID, e))

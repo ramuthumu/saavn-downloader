@@ -39,7 +39,7 @@ class Album:
             print("Unable to get album_id: {0}".format(e))
         return self.album_id
 
-    def setAlbumID(self, album_id):
+    def set_album_id(self, album_id):
         self.album_id = album_id
 
     def get_album(self, album_id=None):

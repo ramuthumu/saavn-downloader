@@ -10,7 +10,7 @@ import urllib3
 urllib3.disable_warnings()
 
 
-class Artist():
+class Artist:
     def __init__(self, proxies, headers, args, url=None):
         self.session = requests.Session()
         self.session.proxies = proxies
@@ -22,7 +22,7 @@ class Artist():
         self.album_IDs_artist = []
         self.url = url
 
-    def getArtistID(self, url=None):
+    def get_artist_id(self, url=None):
         if url:
             self.url = url
         token = self.url.split("/")[-1]
@@ -34,11 +34,11 @@ class Artist():
         self.artistID = response.json()["artistId"]
         return self.artistID
 
-    def setArtistID(self, artistID):
-        self.artistID = artistID
+    def set_artist_id(self, artist_id):
+        self.artistID = artist_id
 
-    def getArtistAlbumsIDs(self):
-        self.artist_json = self.getArtistJson()
+    def get_artist_albums_ids(self):
+        self.artist_json = self.get_artist_json()
         try:
             self.artist_name = self.artist_json['name']
             total_albums = self.artist_json['topAlbums']['total']
@@ -82,51 +82,51 @@ class Artist():
         print('Total Number of Albums found: {0}'.format(len(self.album_IDs_artist)))
         return (self.album_IDs_artist, self.artist_name)
 
-    def getArtist(self):
+    def get_artist(self):
         try:
-            self.getArtistID()
-            self.artist_json = self.getArtistJson()
+            self.get_artist_id()
+            self.artist_json = self.get_artist_json()
         except Exception as e:
             print(str(e))
             print('Please check that the entered URL is for an Artist')
             exit()
         if self.args.song:
             print('Downloading all Artist songs')
-            self.downloadArtistAllSongs()
+            self.download_artist_all_songs()
         else:
             print('Downloading all albums for the Artist')
-            self.getArtistAlbumsIDs()
-            self.downloadArtistAllAlbums()
+            self.get_artist_albums_ids()
+            self.download_artist_all_albums()
 
-    def getArtistJson(self):
+    def get_artist_json(self):
         url = 'https://www.jiosaavn.com/api.php?_marker=0&_format=json&__call=artist.getArtistPageDetails&artistId={0}'.format(
             self.artistID)
         response = self.session.get(url)
         artist_json = response.json()
         return artist_json
 
-    def downloadArtistAllAlbums(self):
+    def download_artist_all_albums(self):
         with ThreadPoolExecutor(max_workers=5) as executor:
             futures = []
             if self.album_IDs_artist:
                 for albumId in self.album_IDs_artist:
-                    futures.append(executor.submit(self.downloadAlbum, albumId))
+                    futures.append(executor.submit(self.download_album, albumId))
                 for future in futures:
                     try:
                         future.result()
                     except Exception as e:
                         print(f'Error getting album: {e}')
 
-    def downloadAlbum(self, album_id):
+    def download_album(self, album_id):
         try:
             album = Album(self.session.proxies, self.session.headers)
-            album.setAlbumID(album_id)
+            album.set_album_id(album_id)
             album.download_album(self.artist_name)
         except Exception as e:
             print('Error getting album with ID: {}'.format(album_id))
             raise e
 
-    def downloadArtistAllSongs(self):
+    def download_artist_all_songs(self):
         try:
             artist_name = self.artist_json['name']
             total_songs = self.artist_json['topSongs']['total']
@@ -152,4 +152,4 @@ class Artist():
             print('No songs found for the artist')
 
     def start_download(self):
-        self.getArtist()
+        self.get_artist()

@@ -16,7 +16,7 @@ class TestAlbum():
         assert type(album_id) is str
 
     def test_setAlbumID(self, album_obj):
-        album_obj.setAlbumID("19805392")
+        album_obj.set_album_id("19805392")
         assert album_obj.album_id == "19805392"
 
     def test_getAlbum(self, album_obj):
