@@ -61,7 +61,7 @@ class Song():
         url = "https://www.jiosaavn.com/api.php" # POST request
         response = self.session.post(url, data=self.payload)
         try:
-            song_json = [x for x in response.text.splitlines() if x.strip().startswith('{')][0]
+            song_json = response.json()
             self.song_json = json.loads(song_json)
         except Exception as e:
             print("An error occured getting the song information")

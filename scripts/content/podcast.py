@@ -17,7 +17,7 @@ class Podcast:
         show_json = {}
         response = requests.get(
                     'https://www.jiosaavn.com/api.php?_format=json&show_id={}&__call=show.getHomePage'.format(showId), proxies=self.proxies, headers=self.headers)
-        show_homepage_json = [x for x in response.text.splitlines() if x.strip().startswith('{')][0]
+        show_homepage_json = response.json()
         show_homepage_json = json.loads(show_homepage_json)
         no_of_seasons = len(show_homepage_json['seasons'])
         for season in range(no_of_seasons):   # Note that season value starts from 0 for the program but from 1 for the url

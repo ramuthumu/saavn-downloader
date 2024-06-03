@@ -58,7 +58,7 @@ class Account:
 
     def createAccount(self, email=None, password=None):
         session, response = self.getAccountSession(email, password, action='user.createV2')
-        data = [x for x in response.text.splitlines() if x.strip().startswith('{')][0]
+        data = response.json()
         data = json.loads(data)
         # print(data)
         if data.get('error'):
@@ -72,7 +72,7 @@ class Account:
         # Function to Emualate android signin and activate library
 
         session, response = self.getAccountSession(email, password, action='user.login')
-        data = [x for x in response.text.splitlines() if x.strip().startswith('{')][0]
+        data = response.json()
         data = json.loads(data)
         # print(data)
         if data.get('error'):
@@ -82,7 +82,7 @@ class Account:
                 response = session.get(
                     "https://www.saavn.com/api.php?_marker=0&cc=&ctx=android&state=login&v=224&app_version=6.8.2"
                     "&api_version=4&_format=json&__call=library.getAll")
-                library_json = [x for x in response.text.splitlines() if x.strip().startswith('{')][0]
+                library_json = response.json()
                 library_json = json.loads(library_json)
                 # print(library_json)
                 self.logout(session)
@@ -97,7 +97,7 @@ class Account:
         # Function to Emulate android signin and activate library and return library_json and session instance
 
         session, response = self.getAccountSession(email, password, action='user.login')
-        data = [x for x in response.text.splitlines() if x.strip().startswith('{')][0]
+        data = response.json()
         data = json.loads(data)
         # print(data)
         if data.get('error'):
@@ -107,7 +107,7 @@ class Account:
                 response = session.get(
                     "https://www.saavn.com/api.php?_marker=0&cc=&ctx=android&state=login&v=224&app_version=6.8.2&api_version=4&_format=json&__call=library.getAll",
                     headers=self.headers)
-                self.library_json = [x for x in response.text.splitlines() if x.strip().startswith('{')][0]
+                self.library_json = response.json()
                 self.library_json = json.loads(self.library_json)
                 # print(self.library_json)
                 return self.library_json, session
@@ -167,7 +167,7 @@ class Account:
                     'https://www.jiosaavn.com/api.php?listid={0}&_format=json&__call=playlist.getDetails'.format(
                         playlist['id']))
                 if response.status_code == 200:
-                    songs_json = [x for x in response.text.splitlines() if x.strip().startswith('{')][0]
+                    songs_json = response.json()
                     songs_json = json.loads(songs_json)
                 np_data[songs_json['listname']] = playlist['id']
 
@@ -202,7 +202,7 @@ class Account:
                     'https://www.jiosaavn.com/api.php?listid={0}&_format=json&__call=playlist.getDetails'.format(
                         playlist['id']))
                 if response.status_code == 200:
-                    songs_json = [x for x in response.text.splitlines() if x.strip().startswith('{')][0]
+                    songs_json = response.json()
                     songs_json = json.loads(songs_json)
                 else:
                     print('Unable to get playlist details from original')

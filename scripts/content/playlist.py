@@ -38,7 +38,7 @@ class Playlist():
         response = requests.get(
             'https://www.jiosaavn.com/api.php?listid={0}&_format=json&__call=playlist.getDetails'.format(playlistID), verify=False, proxies=self.proxies, headers=self.headers)
         if response.status_code == 200:
-            self.songs_json = [x for x in response.text.splitlines() if x.strip().startswith('{')][0]
+            self.songs_json = response.json()
             self.songs_json = json.loads(self.songs_json)
         return self.songs_json
     

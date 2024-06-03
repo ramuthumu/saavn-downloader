@@ -1,14 +1,17 @@
 import requests
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
 import json
 from concurrent.futures import ThreadPoolExecutor
 
 from .album import Album
 from ..download_manager import Manager
 
+import urllib3
+
+urllib3.disable_warnings()
+
+
 class Artist():
     def __init__(self, proxies, headers, args, url=None):
-        requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
         self.session = requests.Session()
         self.session.proxies = proxies
         self.session.headers = headers
@@ -23,7 +26,10 @@ class Artist():
         if url:
             self.url = url
         token = self.url.split("/")[-1]
-        self.url = "https://www.jiosaavn.com/api.php?__call=webapi.get&token={0}&type=artist&p=&n_song=10&n_album=14&sub_type=&category=&sort_order=&includeMetaTags=0&ctx=web6dot0&api_version=4&_format=json&_marker=0".format(token)
+        self.url = ("https://www.jiosaavn.com/api.php?__call=webapi.get&token={"
+                    "0}&type=artist&p=&n_song=10&n_album=14&sub_type=&category=&sort_order=&includeMetaTags=0&ctx"
+                    "=web6dot0&api_version=4&_format=json&_marker=0").format(
+            token)
         response = self.session.get(self.url)
         self.artistID = response.json()["artistId"]
         return self.artistID
@@ -50,13 +56,15 @@ class Artist():
 
                 for n_album_page in range(total_requests):
                     print('Getting Album page: {0}'.format(n_album_page))
-                    url = 'https://www.saavn.com/api.php?_marker=0&_format=json&__call=artist.getArtistPageDetails&artistId={0}&n_album=10&page={1}'.format(self.artistID, n_album_page)
+                    url = ('https://www.saavn.com/api.php?_marker=0&_format=json&__call=artist.getArtistPageDetails'
+                           '&artistId={0}&n_album=10&page={1}').format(
+                        self.artistID, n_album_page)
                     futures.append(executor.submit(self.session.get, url))
 
                 for future in futures:
                     try:
                         response = future.result()
-                        self.artist_json = [x for x in response.text.splitlines() if x.strip().startswith('{')][0]
+                        self.artist_json = response.json()
                         self.artist_json = json.loads(self.artist_json)
                         n_albums_in_page = len(self.artist_json['topAlbums']['albums'])
                         for i in range(n_albums_in_page):
@@ -73,7 +81,6 @@ class Artist():
 
         print('Total Number of Albums found: {0}'.format(len(self.album_IDs_artist)))
         return (self.album_IDs_artist, self.artist_name)
-
 
     def getArtist(self):
         try:
@@ -92,10 +99,10 @@ class Artist():
             self.downloadArtistAllAlbums()
 
     def getArtistJson(self):
-        url = 'https://www.jiosaavn.com/api.php?_marker=0&_format=json&__call=artist.getArtistPageDetails&artistId={0}'.format(self.artistID)
+        url = 'https://www.jiosaavn.com/api.php?_marker=0&_format=json&__call=artist.getArtistPageDetails&artistId={0}'.format(
+            self.artistID)
         response = self.session.get(url)
-        artist_json = [x for x in response.text.splitlines() if x.strip().startswith('{')][0]
-        artist_json = json.loads(artist_json)
+        artist_json = response.json()
         return artist_json
 
     def downloadArtistAllAlbums(self):
@@ -110,13 +117,13 @@ class Artist():
                     except Exception as e:
                         print(f'Error getting album: {e}')
 
-    def downloadAlbum(self, albumId):
+    def downloadAlbum(self, album_id):
         try:
             album = Album(self.session.proxies, self.session.headers)
-            album.setAlbumID(albumId)
+            album.setAlbumID(album_id)
             album.download_album(self.artist_name)
         except Exception as e:
-            print('Error getting album with ID: {}'.format(albumId))
+            print('Error getting album with ID: {}'.format(album_id))
             raise e
 
     def downloadArtistAllSongs(self):
@@ -131,11 +138,13 @@ class Artist():
             print('Total requests: {}'.format(total_requests))
             for n_song_page in range(total_requests):
                 print('Getting Song page: {0}'.format(n_song_page))
-                url = 'https://www.saavn.com/api.php?_marker=0&_format=json&__call=artist.getArtistPageDetails&artistId={0}&n_song=10&page={1}'.format(self.artistID, n_song_page)
+                url = ('https://www.saavn.com/api.php?_marker=0&_format=json&__call=artist.getArtistPageDetails'
+                       '&artistId={0}&n_song=10&page={1}').format(
+                    self.artistID, n_song_page)
                 response = self.session.get(url)  # Change made here
-                self.artist_json = [x for x in response.text.splitlines() if x.strip().startswith('{')][0]
+                self.artist_json = response.json()
                 self.artist_json = json.loads(self.artist_json)
-                songs_json = self.artist_json['topSongs']   # A dict with key songs having at most 10 songs
+                songs_json = self.artist_json['topSongs']  # A dict with key songs having at most 10 songs
                 manager = Manager()
                 manager.download_songs(songs_json, artist_name=artist_name)
         except Exception as e:
