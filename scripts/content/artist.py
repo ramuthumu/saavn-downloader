@@ -1,6 +1,5 @@
 import requests
 import json
-from concurrent.futures import ThreadPoolExecutor
 
 from .album import Album
 from ..download_manager import Manager
@@ -16,10 +15,10 @@ class Artist:
         self.session.proxies = proxies
         self.session.headers = headers
         self.args = args
-        self.artistID = None
+        self.artist_id = None
         self.artist_name = None
         self.artist_json = []
-        self.album_IDs_artist = []
+        self.album_ids_artist = []
         self.url = url
 
     def get_artist_id(self, url=None):
@@ -31,11 +30,11 @@ class Artist:
                     "=web6dot0&api_version=4&_format=json&_marker=0").format(
             token)
         response = self.session.get(self.url)
-        self.artistID = response.json()["artistId"]
-        return self.artistID
+        self.artist_id = response.json()["artistId"]
+        return self.artist_id
 
     def set_artist_id(self, artist_id):
-        self.artistID = artist_id
+        self.artist_id = artist_id
 
     def get_artist_albums_ids(self):
         self.artist_json = self.get_artist_json()
@@ -49,38 +48,30 @@ class Artist:
                 total_requests = total_albums // 10
             print('Total requests: {}'.format(total_requests))
 
-            # Create a ThreadPoolExecutor for making requests concurrently.
-            with ThreadPoolExecutor(max_workers=5) as executor:
-                # Create a list to hold the future results.
-                futures = []
-
-                for n_album_page in range(total_requests):
-                    print('Getting Album page: {0}'.format(n_album_page))
-                    url = ('https://www.saavn.com/api.php?_marker=0&_format=json&__call=artist.getArtistPageDetails'
-                           '&artistId={0}&n_album=10&page={1}').format(
-                        self.artistID, n_album_page)
-                    futures.append(executor.submit(self.session.get, url))
-
-                for future in futures:
-                    try:
-                        response = future.result()
-                        self.artist_json = response.json()
-                        self.artist_json = json.loads(self.artist_json)
-                        n_albums_in_page = len(self.artist_json['topAlbums']['albums'])
-                        for i in range(n_albums_in_page):
-                            albumId = self.artist_json['topAlbums']['albums'][i]['albumid']
-                            self.album_IDs_artist.append(albumId)
-                    except Exception as e:
-                        print(str(e))
-                        print('No albums found for the artist : {0}'.format(self.artist_name))
-                        exit()
+            for n_album_page in range(total_requests):
+                print('Getting Album page: {0}'.format(n_album_page))
+                url = ('https://www.saavn.com/api.php?_marker=0&_format=json&__call=artist.getArtistPageDetails'
+                       '&artistId={0}&n_album=10&page={1}').format(
+                    self.artist_id, n_album_page)
+                try:
+                    response = self.session.get(url)
+                    self.artist_json = response.json()
+                    self.artist_json = json.loads(self.artist_json)
+                    n_albums_in_page = len(self.artist_json['topAlbums']['albums'])
+                    for i in range(n_albums_in_page):
+                        albumId = self.artist_json['topAlbums']['albums'][i]['albumid']
+                        self.album_ids_artist.append(albumId)
+                except Exception as e:
+                    print(str(e))
+                    print('No albums found for the artist : {0}'.format(self.artist_name))
+                    exit()
         except Exception as e:
             print(str(e))
             print('No albums found for the artist : {0}'.format(self.artist_name))
             exit()
 
-        print('Total Number of Albums found: {0}'.format(len(self.album_IDs_artist)))
-        return (self.album_IDs_artist, self.artist_name)
+        print('Total Number of Albums found: {0}'.format(len(self.album_ids_artist)))
+        return self.album_ids_artist, self.artist_name
 
     def get_artist(self):
         try:
@@ -100,22 +91,18 @@ class Artist:
 
     def get_artist_json(self):
         url = 'https://www.jiosaavn.com/api.php?_marker=0&_format=json&__call=artist.getArtistPageDetails&artistId={0}'.format(
-            self.artistID)
+            self.artist_id)
         response = self.session.get(url)
         artist_json = response.json()
         return artist_json
 
     def download_artist_all_albums(self):
-        with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = []
-            if self.album_IDs_artist:
-                for albumId in self.album_IDs_artist:
-                    futures.append(executor.submit(self.download_album, albumId))
-                for future in futures:
-                    try:
-                        future.result()
-                    except Exception as e:
-                        print(f'Error getting album: {e}')
+        if self.album_ids_artist:
+            for albumId in self.album_ids_artist:
+                try:
+                    self.download_album(albumId)
+                except Exception as e:
+                    print(f'Error getting album: {e}')
 
     def download_album(self, album_id):
         try:
@@ -140,7 +127,7 @@ class Artist:
                 print('Getting Song page: {0}'.format(n_song_page))
                 url = ('https://www.saavn.com/api.php?_marker=0&_format=json&__call=artist.getArtistPageDetails'
                        '&artistId={0}&n_song=10&page={1}').format(
-                    self.artistID, n_song_page)
+                    self.artist_id, n_song_page)
                 response = self.session.get(url)  # Change made here
                 self.artist_json = response.json()
                 self.artist_json = json.loads(self.artist_json)

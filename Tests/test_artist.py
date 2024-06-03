@@ -18,4 +18,4 @@ class TestArtist():
 
     def test_setArtistID(self, artist_obj):
         artist_obj.set_artist_id("455127")
-        assert artist_obj.artistID == "455127"
+        assert artist_obj.artist_id == "455127"
