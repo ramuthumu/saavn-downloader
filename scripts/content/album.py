@@ -13,8 +13,7 @@ class Album:
         self.proxies = proxies
         self.headers = headers
         self.album_id = None
-        self.album_name = ''
-        self.songs_json = []
+        self.album_json = []
         self.url = url
 
     def get_album_id(self, url=None):
@@ -49,8 +48,8 @@ class Album:
             'https://www.jiosaavn.com/api.php?_format=json&__call=content.getAlbumDetails&albumid={0}'.format(album_id),
             verify=False, proxies=self.proxies, headers=self.headers)
         if response.status_code == 200:
-            self.songs_json = response.json()
-        return self.songs_json
+            self.album_json = response.json()
+        return self.album_json
 
     def download_album(self, artist_name=''):
         if self.album_id is not None:

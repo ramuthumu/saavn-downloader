@@ -3,6 +3,7 @@ import argparse
 import json
 import re
 
+
 def scan_url(url):
     url_parts = url.split('/')
     if 'album' in url_parts:
@@ -14,9 +15,10 @@ def scan_url(url):
     elif 'song' in url_parts:
         return 'song'
 
+
 def setProxy():
     proxy_ip = ''
-    if ('http_proxy' in os.environ):
+    if 'http_proxy' in os.environ:
         proxy_ip = os.environ['http_proxy']
     proxies = {
         'http': proxy_ip,
@@ -28,6 +30,7 @@ def setProxy():
         'X-Forwarded-For': '1.6.0.0'
     }
     return proxies, headers
+
 
 def argManager():
     parser = argparse.ArgumentParser()

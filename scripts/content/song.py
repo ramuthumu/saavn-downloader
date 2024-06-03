@@ -6,7 +6,7 @@ from ..helper import setProxy, argManager
 from ..download_manager import Manager, format_filename
 
 
-class Song():
+class Song:
     def __init__(self, proxies, headers, url=None):
         self.session = requests.session()
         self.session.headers.update(headers)
@@ -31,11 +31,11 @@ class Song():
             }
         self.args = argManager()
         self.url = url
-        self.songID = None
+        self.song_id = None
         self.song_json = None
 
     def setSongID(self, song_id):
-        self.songID = song_id
+        self.song_id = song_id
 
     def getSongID(self):
         if self.url:
@@ -46,8 +46,8 @@ class Song():
         input_url = "https://www.jiosaavn.com/api.php?__call=webapi.get&token={0}&type=song&includeMetaTags=0&ctx=web6dot0&api_version=4&_format=json&_marker=0".format(token)
         response = self.session.get(input_url)
         try:
-            self.songID = response.json()["songs"][0]["id"]
-            return self.songID
+            self.song_id = response.json()["songs"][0]["id"]
+            return self.song_id
         except Exception as e:
             print("Unable to get the song from URL")
             print(e)
@@ -71,7 +71,7 @@ class Song():
 
     def downloadSong(self, album_name='songs', artist_name='Non-Artist'):
         manager = Manager()
-        song = self.song_json[self.songID]
+        song = self.song_json[self.song_id]
         try:
             dec_url = manager.get_dec_url(song["more_info"]['encrypted_media_url'])
             filename = format_filename(song['title'])

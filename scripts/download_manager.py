@@ -95,8 +95,8 @@ class Manager:
 
     def download_songs(self, album, artist_name='Non-Artist'):
         print(f"Downloading {album.list_count} songs...")
-        songs_json = album.songs_json
-        album_name = album.album_name
+        songs_json = album.album_json
+        album_name = album.album_json['name']
         songs = [song for song in songs_json['songs']]
         total_tracks = len(songs)
 

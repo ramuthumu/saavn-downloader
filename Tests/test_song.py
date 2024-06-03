@@ -17,10 +17,10 @@ class TestSong():
 
     def test_setSongID(self, song_obj):
         song_obj.setSongID("13bQVh6n")
-        assert song_obj.songID == "13bQVh6n"
+        assert song_obj.song_id == "13bQVh6n"
 
     def test_getSong(self, song_obj):
         song_json = song_obj.getSong()
         assert isinstance(song_json, dict)
-        assert song_obj.songID in song_json
-        assert song_json[song_obj.songID].get("more_info", None) is not None
+        assert song_obj.song_id in song_json
+        assert song_json[song_obj.song_id].get("more_info", None) is not None
