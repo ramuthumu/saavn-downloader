@@ -99,7 +99,7 @@ class Artist():
         return artist_json
 
     def downloadArtistAllAlbums(self):
-        with ThreadPoolExecutor(max_workers=5) as executor:
+        with ThreadPoolExecutor(max_workers=2) as executor:
             futures = []
             if self.album_IDs_artist:
                 for albumId in self.album_IDs_artist:

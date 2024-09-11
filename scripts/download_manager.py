@@ -92,7 +92,7 @@ class Manager():
 
         songs = [song for song in songs_json['songs'] if song['language'] in ['english', 'telugu']]
 
-        with ThreadPoolExecutor(max_workers=10) as executor:
+        with ThreadPoolExecutor(max_workers=2) as executor:
             futures = []
             total_tracks = len(songs)
 

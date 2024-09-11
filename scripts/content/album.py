@@ -1,13 +1,15 @@
 import requests
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
 import json
 import html
+
+import urllib3
+from urllib3.exceptions import InsecureRequestWarning
 
 from ..download_manager import Manager
 
 class Album():
     def __init__(self, proxies, headers, url=None):
-        requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+        urllib3.disable_warnings(InsecureRequestWarning)
         self.proxies = proxies
         self.headers = headers
         self.albumID = None
