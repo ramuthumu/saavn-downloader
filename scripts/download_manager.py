@@ -51,7 +51,7 @@ class Manager():
     def get_download_location(self, *args):
         with self.lock:  # Acquire the lock before checking and creating directory
             if self.args.outFolder is None:
-                location = os.getcwd()
+                location = "/mnt/ssd/plex/data/music/"
             else:
                 location = self.args.outFolder
             for folder in args:
